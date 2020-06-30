@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const { User } = require("../sequelize");
 
 exports.protect = async (req, res, next) => {
 	if (!req.headers.authorization) {
@@ -15,7 +15,7 @@ exports.protect = async (req, res, next) => {
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
 		const user = await User.findOne({
-			attributes: ["firstname", "lastname", "username", "email"],
+			attributes: ["id", "firstname", "lastname", "username", "email"],
 			where: {
 				id: decoded.id
 			}

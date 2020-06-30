@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const { User } = require("../sequelize");
 const asyncHandler = require("../middlewares/asyncHandler");
 
 exports.getUsers = asyncHandler(async (req, res, next) => {

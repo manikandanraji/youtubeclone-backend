@@ -1,14 +1,7 @@
-require("dotenv").config();
-const { Sequelize, DataTypes, Model } = require("sequelize");
+const { Sequelize } = require("sequelize");
 
-const sequelize = new Sequelize(process.env.POSTGRES_URI, { logging: false });
-
-(async () => await sequelize.sync())()
-
-class User extends Model {}
-
-User.init(
-	{
+module.exports = (sequelize, DataTypes) => {
+	return sequelize.define("User", {
 		id: {
 			type: DataTypes.UUID,
 			allowNull: false,
@@ -31,23 +24,22 @@ User.init(
 		email: {
 			type: DataTypes.STRING,
 			allowNull: false,
-			unique: true
+			unique: true,
+			validate: {
+				isEmail: true
+			}
 		},
 		password: {
 			type: DataTypes.STRING,
-			allowNull: false
+			allowNull: false,
+			validate: {
+				min: 6
+			}
 		},
 		isAdmin: {
 			type: DataTypes.BOOLEAN,
 			allowNull: false,
 			defaultValue: false
 		}
-	},
-	{
-		sequelize,
-		modelName: "User"
-	}
-);
-
-
-module.exports = User;
+	});
+};
