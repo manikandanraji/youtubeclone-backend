@@ -36,6 +36,19 @@ module.exports = (sequelize, DataTypes) => {
 				min: 6
 			}
 		},
+		avatar: {
+			type: DataTypes.STRING,
+			defaultValue:
+				"https://res.cloudinary.com/douy56nkf/image/upload/v1593256483/instaclone/g519nj8a5bgmsr5cyrw7.png"
+		},
+		cover: {
+			type: DataTypes.STRING,
+			defaultValue:
+				"https://res.cloudinary.com/douy56nkf/image/upload/v1588128318/twitter-build/s4fftpwcaxpf19vh6zdo.png"
+		},
+		channelDescription: {
+			type: DataTypes.STRING
+		},
 		isAdmin: {
 			type: DataTypes.BOOLEAN,
 			allowNull: false,

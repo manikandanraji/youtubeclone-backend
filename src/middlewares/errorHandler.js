@@ -8,11 +8,6 @@ const errorHandler = (err, req, res, next) => {
 		statusCode = 400;
 	}
 
-	if (err.parent.routine === "string_to_uuid") {
-		message = `No resource for given id`;
-		statusCode = 400;
-	}
-
 	if (err.name === "SequelizeUniqueConstraintError") {
 		const field = err.errors.map(error => error.path)[0];
 		message = `The ${field} is already taken`;

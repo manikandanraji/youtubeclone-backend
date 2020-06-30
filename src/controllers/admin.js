@@ -1,4 +1,4 @@
-const { User } = require("../sequelize");
+const { User, Video } = require("../sequelize");
 const asyncHandler = require("../middlewares/asyncHandler");
 
 exports.getUsers = asyncHandler(async (req, res, next) => {
@@ -15,4 +15,12 @@ exports.removeUser = asyncHandler(async (req, res, next) => {
 	});
 
 	res.status(200).json({ success: true, data: {} });
+});
+
+exports.getVideos = asyncHandler(async (req, res, next) => {
+	const videos = await Video.findAll({
+		attributes: ["id", "title", "description", "url", "userId"]
+	});
+
+	res.status(200).json({ success: true, data: videos });
 });
