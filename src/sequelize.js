@@ -27,7 +27,6 @@ Video.belongsToMany(User, { through: VideoLike, foreignKey: "videoId" });
 User.hasMany(Comment, {
 	foreignKey: "userId"
 });
-
 Comment.belongsTo(User, { foreignKey: "userId" });
 
 Video.hasMany(Comment, {
@@ -36,12 +35,12 @@ Video.hasMany(Comment, {
 
 // subscription association
 User.hasMany(Subscription, {
-	foreignKey: 'subscribeTo'
-})
+	foreignKey: "subscribeTo"
+});
 
 // views association
-User.belongsToMany(Video, { through: View, foreignKey: 'userId' });
-Video.belongsToMany(User, { through: View, foreignKey: 'videoId' });
+User.belongsToMany(Video, { through: View, foreignKey: "userId" });
+Video.belongsToMany(User, { through: View, foreignKey: "videoId" });
 
 module.exports = {
 	User,
@@ -49,5 +48,5 @@ module.exports = {
 	VideoLike,
 	Comment,
 	Subscription,
-	View,
+	View
 };

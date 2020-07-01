@@ -1,5 +1,12 @@
 const { Op } = require("sequelize");
-const { User, Video, VideoLike, Comment, View } = require("../sequelize");
+const {
+	User,
+	Video,
+	VideoLike,
+	Comment,
+	View,
+	Subscription
+} = require("../sequelize");
 const asyncHandler = require("../middlewares/asyncHandler");
 
 exports.newVideo = asyncHandler(async (req, res, next) => {
@@ -21,6 +28,13 @@ exports.getVideo = asyncHandler(async (req, res, next) => {
 		]
 	});
 
+	if (!video) {
+		return next({
+			message: `No video found for ID - ${req.params.id}`,
+			statusCode: 404
+		});
+	}
+
 	const comments = await video.getComments({
 		attributes: ["id", "text", "createdAt"],
 		include: [
@@ -41,7 +55,6 @@ exports.getVideo = asyncHandler(async (req, res, next) => {
 			]
 		}
 	});
-	console.log(isLiked);
 
 	const isDisliked = await VideoLike.findOne({
 		where: {
@@ -52,20 +65,50 @@ exports.getVideo = asyncHandler(async (req, res, next) => {
 			]
 		}
 	});
-	console.log(isDisliked);
+
+	const commentsCount = await Comment.count({
+		where: {
+			videoId: req.params.id
+		}
+	});
+
+	const likesCount = await VideoLike.count({
+		where: {
+			[Op.and]: [{ videoId: req.params.id }, { like: 1 }]
+		}
+	});
+
+	const dislikesCount = await VideoLike.count({
+		where: {
+			[Op.and]: [{ videoId: req.params.id }, { like: -1 }]
+		}
+	});
+
+	const viewsCount = await View.count({
+		where: {
+			videoId: req.params.id
+		}
+	});
+
+	const isSubscribed = await Subscription.findOne({
+		where: {
+			subscriber: req.user.id,
+			subscribeTo: video.userId
+		}
+	});
+
+	const isVideoMine = req.user.id === video.userId;
 
 	// likesCount, disLikesCount, viewsCount
-
 	video.setDataValue("comments", comments);
+	video.setDataValue("commentsCount", commentsCount);
 	video.setDataValue("isLiked", !!isLiked);
 	video.setDataValue("isDisliked", !!isDisliked);
-
-	if (!video) {
-		return next({
-			message: `No video found for ID - ${req.params.id}`,
-			statusCode: 404
-		});
-	}
+	video.setDataValue("likesCount", likesCount);
+	video.setDataValue("dislikesCount", dislikesCount);
+	video.setDataValue("viewsCount", viewsCount);
+	video.setDataValue("isVideoMine", isVideoMine);
+	video.setDataValue("isSubscribed", !!isSubscribed);
 
 	res.status(200).json({ success: true, data: video });
 });
@@ -182,4 +225,33 @@ exports.newView = asyncHandler(async (req, res, next) => {
 	});
 
 	res.status(200).json({ success: true, data: {} });
+});
+
+exports.searchVideo = asyncHandler(async (req, res, next) => {
+	if (!req.query.searchterm) {
+		return next({ message: "Please enter the searchterm", statusCode: 400 });
+	}
+
+	const videos = await Video.findAll({
+		include: { model: User, attributes: ["id", "avatar", "username"] },
+		where: {
+			[Op.or]: {
+				title: {
+					[Op.substring]: req.query.searchterm
+				},
+				description: {
+					[Op.substring]: req.query.searchterm
+				}
+			}
+		}
+	});
+
+	videos.forEach(async (video, index) => {
+		const views = await View.count({ where: { videoId: video.id } });
+		video.setDataValue('views', views);
+
+		if (index >= videos.length - 1) {
+			return res.status(200).json({ success: true, data: videos });
+		}
+	});
 });

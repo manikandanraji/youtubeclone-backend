@@ -7,10 +7,12 @@ const {
 	dislikeVideo,
 	addComment,
 	newView,
+	searchVideo,
 } = require("../controllers/video");
 const { protect } = require("../middlewares/auth");
 
 router.route("/").post(protect, newVideo);
+router.route("/search").get(protect, searchVideo);
 router.route("/:id").get(protect, getVideo);
 router.route("/:id/like").get(protect, likeVideo);
 router.route("/:id/dislike").get(protect, dislikeVideo);
