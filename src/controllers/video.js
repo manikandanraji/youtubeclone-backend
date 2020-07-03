@@ -36,6 +36,7 @@ exports.getVideo = asyncHandler(async (req, res, next) => {
 	}
 
 	const comments = await video.getComments({
+		order: [["createdAt", "DESC"]],
 		attributes: ["id", "text", "createdAt"],
 		include: [
 			{
@@ -97,6 +98,10 @@ exports.getVideo = asyncHandler(async (req, res, next) => {
 		}
 	});
 
+	const subscribersCount = await Subscription.count({
+		where: { subscribeTo: video.userId }
+	});
+
 	const isVideoMine = req.user.id === video.userId;
 
 	// likesCount, disLikesCount, viewsCount
@@ -109,6 +114,7 @@ exports.getVideo = asyncHandler(async (req, res, next) => {
 	video.setDataValue("viewsCount", viewsCount);
 	video.setDataValue("isVideoMine", isVideoMine);
 	video.setDataValue("isSubscribed", !!isSubscribed);
+	video.setDataValue("subscribersCount", subscribersCount);
 
 	res.status(200).json({ success: true, data: video });
 });
@@ -195,6 +201,14 @@ exports.addComment = asyncHandler(async (req, res, next) => {
 		videoId: req.params.id
 	});
 
+	const User = {
+		id: req.user.id,
+		avatar: req.user.avatar,
+		username: req.user.username
+	};
+
+	comment.setDataValue("User", User);
+
 	res.status(200).json({ success: true, data: comment });
 });
 
@@ -248,7 +262,7 @@ exports.searchVideo = asyncHandler(async (req, res, next) => {
 
 	videos.forEach(async (video, index) => {
 		const views = await View.count({ where: { videoId: video.id } });
-		video.setDataValue('views', views);
+		video.setDataValue("views", views);
 
 		if (index >= videos.length - 1) {
 			return res.status(200).json({ success: true, data: videos });

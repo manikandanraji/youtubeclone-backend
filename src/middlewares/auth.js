@@ -15,7 +15,7 @@ exports.protect = async (req, res, next) => {
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
 		const user = await User.findOne({
-			attributes: ["id", "firstname", "lastname", "username", "email"],
+			attributes: ["id", "firstname", "lastname", "username", "email", "avatar", "cover", "channelDescription"],
 			where: {
 				id: decoded.id
 			}

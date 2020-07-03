@@ -19,7 +19,7 @@ exports.removeUser = asyncHandler(async (req, res, next) => {
 
 exports.getVideos = asyncHandler(async (req, res, next) => {
 	const videos = await Video.findAll({
-		attributes: ["id", "title", "description", "url", "userId"]
+		attributes: ["id", "title", "description", "url", "thumbnail", "userId"]
 	});
 
 	res.status(200).json({ success: true, data: videos });

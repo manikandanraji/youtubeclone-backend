@@ -1,5 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const { recommendedVideos } = require("../controllers/user");
+const { protect } = require("../middlewares/auth");
+
 const {
 	newVideo,
 	getVideo,
@@ -7,11 +10,11 @@ const {
 	dislikeVideo,
 	addComment,
 	newView,
-	searchVideo,
+	searchVideo
 } = require("../controllers/video");
-const { protect } = require("../middlewares/auth");
 
 router.route("/").post(protect, newVideo);
+router.route("/").get(recommendedVideos);
 router.route("/search").get(protect, searchVideo);
 router.route("/:id").get(protect, getVideo);
 router.route("/:id/like").get(protect, likeVideo);
