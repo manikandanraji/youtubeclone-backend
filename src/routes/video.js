@@ -10,7 +10,7 @@ const {
 	dislikeVideo,
 	addComment,
 	newView,
-	searchVideo
+	searchVideo,
 } = require("../controllers/video");
 
 router.route("/").post(protect, newVideo);

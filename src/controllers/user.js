@@ -51,18 +51,19 @@ exports.getFeed = asyncHandler(async (req, res, next) => {
 	});
 
 	const subscriptions = subscribedTo.map(sub => sub.subscribeTo);
-	subscriptions.push(req.user.id);
+	// subscriptions.push(req.user.id);
 
 	const feed = await Video.findAll({
 		include: {
 			model: User,
 			attributes: ["id", "avatar", "username"]
-		}
-		// where: {
-		// 	userId: {
-		// 		[Op.in]: subscriptions
-		// 	}
-		// }
+		},
+		where: {
+			userId: {
+				[Op.in]: subscriptions
+			}
+		},
+		order: [["createdAt", "DESC"]]
 	});
 
 	if (!feed.length) {
@@ -113,6 +114,9 @@ exports.searchUser = asyncHandler(async (req, res, next) => {
 			}
 		}
 	});
+
+	if (!users.length)
+		return res.status(200).json({ success: true, data: users });
 
 	users.forEach(async (user, index) => {
 		const subscribersCount = await Subscription.count({
@@ -206,7 +210,8 @@ exports.getProfile = asyncHandler(async (req, res, next) => {
 		attributes: ["id", "thumbnail", "title", "createdAt"]
 	});
 
-	if(!videos.length) return res.status(200).json({ success: true, data: user })
+	if (!videos.length)
+		return res.status(200).json({ success: true, data: user });
 
 	videos.forEach(async (video, index) => {
 		const views = await View.count({ where: { videoId: video.id } });
@@ -222,8 +227,16 @@ exports.getProfile = asyncHandler(async (req, res, next) => {
 
 exports.recommendedVideos = asyncHandler(async (req, res, next) => {
 	const videos = await Video.findAll({
-		attributes: ["id", "title", "thumbnail", "userId", "createdAt"],
-		include: [{ model: User, attributes: ["id", "avatar", "username"] }]
+		attributes: [
+			"id",
+			"title",
+			"description",
+			"thumbnail",
+			"userId",
+			"createdAt"
+		],
+		include: [{ model: User, attributes: ["id", "avatar", "username"] }],
+		order: [["createdAt", "DESC"]]
 	});
 
 	if (!videos.length)
@@ -258,6 +271,40 @@ exports.recommendChannels = asyncHandler(async (req, res, next) => {
 
 		if (index >= channels.length - 1) {
 			return res.status(200).json({ success: true, data: channels });
+		}
+	});
+});
+
+exports.getLikedVideos = asyncHandler(async (req, res, next) => {
+	const likedVideos = await VideoLike.findAll({
+		where: { userId: req.user.id }
+	});
+	const videoIds = likedVideos.map(likedVideo => likedVideo.videoId);
+
+	const videos = await Video.findAll({
+		attributes: ["id", "title", "description", "createdAt", "thumbnail", "url"],
+		include: {
+			model: User,
+			attributes: ["id", "username", "avatar"]
+		},
+		order: [["createdAt", "DESC"]],
+		where: {
+			id: {
+				[Op.in]: videoIds
+			}
+		}
+	});
+
+	if (!videos.length) {
+		return res.status(200).json({ success: true, data: videos });
+	}
+
+	videos.forEach(async (video, index) => {
+		const views = await View.count({ where: { videoId: video.id } });
+		video.setDataValue("views", views);
+
+		if (index >= videos.length - 1) {
+			return res.status(200).json({ success: true, data: videos });
 		}
 	});
 });

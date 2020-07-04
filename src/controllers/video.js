@@ -132,24 +132,33 @@ exports.likeVideo = asyncHandler(async (req, res, next) => {
 	const liked = await VideoLike.findOne({
 		where: {
 			userId: req.user.id,
-			videoId: req.params.id
+			videoId: req.params.id,
+			like: 1
 		}
 	});
 
-	let like;
+	const disliked = await VideoLike.findOne({
+		where: {
+			userId: req.user.id,
+			videoId: req.params.id,
+			like: -1
+		}
+	});
 
 	if (liked) {
-		liked.like = 1;
-		await liked.save();
+		await liked.destroy();
+	} else if (disliked) {
+		disliked.like = 1;
+		await disliked.save();
 	} else {
-		like = await VideoLike.create({
+		await VideoLike.create({
 			userId: req.user.id,
 			videoId: req.params.id,
 			like: 1
 		});
 	}
 
-	res.json({ success: true, data: liked ? liked : like });
+	res.json({ success: true, data: {} });
 });
 
 exports.dislikeVideo = asyncHandler(async (req, res, next) => {
@@ -165,24 +174,33 @@ exports.dislikeVideo = asyncHandler(async (req, res, next) => {
 	const liked = await VideoLike.findOne({
 		where: {
 			userId: req.user.id,
-			videoId: req.params.id
+			videoId: req.params.id,
+			like: 1
 		}
 	});
 
-	let dislike;
+	const disliked = await VideoLike.findOne({
+		where: {
+			userId: req.user.id,
+			videoId: req.params.id,
+			like: -1
+		}
+	});
 
-	if (liked) {
+	if (disliked) {
+		await disliked.destroy();
+	} else if (liked) {
 		liked.like = -1;
 		await liked.save();
 	} else {
-		dislike = await VideoLike.create({
+		await VideoLike.create({
 			userId: req.user.id,
 			videoId: req.params.id,
 			like: -1
 		});
 	}
 
-	res.json({ success: true, data: liked ? liked : dislike });
+	res.json({ success: true, data: {} });
 });
 
 exports.addComment = asyncHandler(async (req, res, next) => {
@@ -259,6 +277,9 @@ exports.searchVideo = asyncHandler(async (req, res, next) => {
 			}
 		}
 	});
+
+	if (!videos.length)
+		return res.status(200).json({ success: true, data: videos });
 
 	videos.forEach(async (video, index) => {
 		const views = await View.count({ where: { videoId: video.id } });
