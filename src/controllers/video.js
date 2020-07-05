@@ -46,7 +46,6 @@ exports.getVideo = asyncHandler(async (req, res, next) => {
 		]
 	});
 
-	// isLiked, isDisliked, isSubscribed, videoMine
 	const isLiked = await VideoLike.findOne({
 		where: {
 			[Op.and]: [
@@ -85,7 +84,7 @@ exports.getVideo = asyncHandler(async (req, res, next) => {
 		}
 	});
 
-	const viewsCount = await View.count({
+	const views = await View.count({
 		where: {
 			videoId: req.params.id
 		}
@@ -98,22 +97,30 @@ exports.getVideo = asyncHandler(async (req, res, next) => {
 		}
 	});
 
+	const isViewed = await View.findOne({
+		where: {
+			userId: req.user.id,
+			videoId: video.id
+		}
+	});
+
 	const subscribersCount = await Subscription.count({
 		where: { subscribeTo: video.userId }
 	});
 
 	const isVideoMine = req.user.id === video.userId;
 
-	// likesCount, disLikesCount, viewsCount
+	// likesCount, disLikesCount, views
 	video.setDataValue("comments", comments);
 	video.setDataValue("commentsCount", commentsCount);
 	video.setDataValue("isLiked", !!isLiked);
 	video.setDataValue("isDisliked", !!isDisliked);
 	video.setDataValue("likesCount", likesCount);
 	video.setDataValue("dislikesCount", dislikesCount);
-	video.setDataValue("viewsCount", viewsCount);
+	video.setDataValue("views", views);
 	video.setDataValue("isVideoMine", isVideoMine);
 	video.setDataValue("isSubscribed", !!isSubscribed);
+	video.setDataValue("isViewed", !!isViewed);
 	video.setDataValue("subscribersCount", subscribersCount);
 
 	res.status(200).json({ success: true, data: video });
@@ -285,7 +292,7 @@ exports.searchVideo = asyncHandler(async (req, res, next) => {
 		const views = await View.count({ where: { videoId: video.id } });
 		video.setDataValue("views", views);
 
-		if (index >= videos.length - 1) {
+		if (index === videos.length - 1) {
 			return res.status(200).json({ success: true, data: videos });
 		}
 	});

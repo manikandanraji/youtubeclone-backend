@@ -6,7 +6,9 @@ const CommentModel = require("./models/Comment");
 const SubscriptionModel = require("./models/Subscription");
 const ViewModel = require("./models/View");
 
-const sequelize = new Sequelize(process.env.POSTGRES_URI, { logging: false });
+const sequelize = new Sequelize(process.env.POSTGRES_URI, {
+	logging: false
+});
 (async () => await sequelize.sync({ alter: true }))();
 
 const User = UserModel(sequelize, DataTypes);

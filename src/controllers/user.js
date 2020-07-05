@@ -51,7 +51,6 @@ exports.getFeed = asyncHandler(async (req, res, next) => {
 	});
 
 	const subscriptions = subscribedTo.map(sub => sub.subscribeTo);
-	// subscriptions.push(req.user.id);
 
 	const feed = await Video.findAll({
 		include: {
@@ -74,7 +73,7 @@ exports.getFeed = asyncHandler(async (req, res, next) => {
 		const views = await View.count({ where: { videoId: video.id } });
 		video.setDataValue("views", views);
 
-		if (index >= feed.length - 1) {
+		if (index === feed.length - 1) {
 			return res.status(200).json({ success: true, data: feed });
 		}
 	});
@@ -140,7 +139,7 @@ exports.searchUser = asyncHandler(async (req, res, next) => {
 		user.setDataValue("isSubscribed", !!isSubscribed);
 		user.setDataValue("isMe", isMe);
 
-		if (index >= users.length - 1) {
+		if (index === users.length - 1) {
 			return res.status(200).json({ success: true, data: users });
 		}
 	});
@@ -159,6 +158,13 @@ exports.getProfile = asyncHandler(async (req, res, next) => {
 			"channelDescription"
 		]
 	});
+
+	if (!user) {
+		return next({
+			message: `No user found for ID - ${req.params.id}`,
+			statusCode: 404
+		});
+	}
 
 	// subscribersCount, isMe, isSubscribed
 	const subscribersCount = await Subscription.count({
@@ -189,22 +195,6 @@ exports.getProfile = asyncHandler(async (req, res, next) => {
 		}
 	});
 
-	channels.forEach(async channel => {
-		const subscribersCount = await Subscription.count({
-			where: { subscribeTo: channel.id }
-		});
-		channel.setDataValue("subscribersCount", subscribersCount);
-
-		const isSubscribed = await Subscription.findOne({
-			where: {
-				[Op.and]: [{ subscriber: req.user.id }, { subscribeTo: channel.id }]
-			}
-		});
-		channel.setDataValue("isSubscribed", !!isSubscribed);
-	});
-
-	user.setDataValue("channels", channels);
-
 	const videos = await Video.findAll({
 		where: { userId: req.params.id },
 		attributes: ["id", "thumbnail", "title", "createdAt"]
@@ -217,9 +207,8 @@ exports.getProfile = asyncHandler(async (req, res, next) => {
 		const views = await View.count({ where: { videoId: video.id } });
 		video.setDataValue("views", views);
 
-		if (index >= videos.length - 1) {
+		if (index === videos.length - 1) {
 			user.setDataValue("videos", videos);
-
 			return res.status(200).json({ success: true, data: user });
 		}
 	});
@@ -246,7 +235,7 @@ exports.recommendedVideos = asyncHandler(async (req, res, next) => {
 		const views = await View.count({ where: { videoId: video.id } });
 		video.setDataValue("views", views);
 
-		if (index >= videos.length - 1) {
+		if (index === videos.length - 1) {
 			return res.status(200).json({ success: true, data: videos });
 		}
 	});
@@ -254,7 +243,12 @@ exports.recommendedVideos = asyncHandler(async (req, res, next) => {
 
 exports.recommendChannels = asyncHandler(async (req, res, next) => {
 	const channels = await User.findAll({
-		attributes: ["id", "username", "avatar", "channelDescription"]
+		attributes: ["id", "username", "avatar", "channelDescription"],
+		where: {
+			id: {
+				[Op.not]: req.user.id
+			}
+		}
 	});
 
 	if (!channels.length)
@@ -266,20 +260,38 @@ exports.recommendChannels = asyncHandler(async (req, res, next) => {
 		});
 		channel.setDataValue("subscribersCount", subscribersCount);
 
+		const isSubscribed = await Subscription.findOne({
+			where: {
+				subscriber: req.user.id,
+				subscribeTo: channel.id
+			}
+		});
+
+		channel.setDataValue("isSubscribed", !!isSubscribed);
+
 		const videosCount = await Video.count({ where: { userId: channel.id } });
 		channel.setDataValue("videosCount", videosCount);
 
-		if (index >= channels.length - 1) {
+		if (index === channels.length - 1) {
 			return res.status(200).json({ success: true, data: channels });
 		}
 	});
 });
 
 exports.getLikedVideos = asyncHandler(async (req, res, next) => {
-	const likedVideos = await VideoLike.findAll({
+	return getVideos(VideoLike, req, res, next);
+});
+
+exports.getHistory = asyncHandler(async (req, res, next) => {
+	return getVideos(View, req, res, next);
+});
+
+const getVideos = async (model, req, res, next) => {
+	const videoRelations = await model.findAll({
 		where: { userId: req.user.id }
 	});
-	const videoIds = likedVideos.map(likedVideo => likedVideo.videoId);
+
+	const videoIds = videoRelations.map(videoRelation => videoRelation.videoId);
 
 	const videos = await Video.findAll({
 		attributes: ["id", "title", "description", "createdAt", "thumbnail", "url"],
@@ -303,8 +315,8 @@ exports.getLikedVideos = asyncHandler(async (req, res, next) => {
 		const views = await View.count({ where: { videoId: video.id } });
 		video.setDataValue("views", views);
 
-		if (index >= videos.length - 1) {
+		if (index === videos.length - 1) {
 			return res.status(200).json({ success: true, data: videos });
 		}
 	});
-});
+};

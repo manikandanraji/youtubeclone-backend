@@ -37,7 +37,7 @@ exports.admin = async (req, res, next) => {
 	}
 
 	return next({
-		message: "You need to an admin to visit this route",
+		message: "Authorization denied, only admins can visit this route",
 		statusCode: 401
 	});
 };

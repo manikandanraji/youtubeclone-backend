@@ -17,6 +17,14 @@ exports.removeUser = asyncHandler(async (req, res, next) => {
 	res.status(200).json({ success: true, data: {} });
 });
 
+exports.removeVideo = asyncHandler(async (req, res, next) => {
+	await Video.destroy({
+		where: { id: req.params.id }
+	});
+
+	res.status(200).json({ success: true, data: {} });
+});
+
 exports.getVideos = asyncHandler(async (req, res, next) => {
 	const videos = await Video.findAll({
 		attributes: ["id", "title", "description", "url", "thumbnail", "userId"]
