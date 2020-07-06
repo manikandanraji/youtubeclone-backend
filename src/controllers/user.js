@@ -195,6 +195,15 @@ exports.getProfile = asyncHandler(async (req, res, next) => {
 		}
 	});
 
+	channels.forEach(async channel => {
+		const subscribersCount = await Subscription.count({
+			where: { subscribeTo: channel.id }
+		});
+		channel.setDataValue("subscribersCount", subscribersCount);
+	});
+
+	user.setDataValue("channels", channels);
+
 	const videos = await Video.findAll({
 		where: { userId: req.params.id },
 		attributes: ["id", "thumbnail", "title", "createdAt"]
@@ -288,7 +297,8 @@ exports.getHistory = asyncHandler(async (req, res, next) => {
 
 const getVideos = async (model, req, res, next) => {
 	const videoRelations = await model.findAll({
-		where: { userId: req.user.id }
+		where: { userId: req.user.id },
+		order: [["createdAt", "ASC"]]
 	});
 
 	const videoIds = videoRelations.map(videoRelation => videoRelation.videoId);
@@ -299,7 +309,6 @@ const getVideos = async (model, req, res, next) => {
 			model: User,
 			attributes: ["id", "username", "avatar"]
 		},
-		order: [["createdAt", "DESC"]],
 		where: {
 			id: {
 				[Op.in]: videoIds
