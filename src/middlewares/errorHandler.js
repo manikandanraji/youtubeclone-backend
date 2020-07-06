@@ -2,8 +2,6 @@ const errorHandler = (err, req, res, next) => {
 	let message = err.message || "Internal Server Error";
 	let statusCode = err.statusCode || 500;
 
-	console.log(err);
-
 	if (err.name === "SequelizeValidationError") {
 		const fields = err.errors.map(field => field.path);
 		message = `These fields should not be empty: ${fields.join(", ")}`;

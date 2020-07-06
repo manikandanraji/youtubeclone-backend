@@ -1,3 +1,4 @@
+const pg = require("pg");
 const { Sequelize, DataTypes } = require("sequelize");
 const UserModel = require("./models/User");
 const VideoModel = require("./models/Video");
@@ -6,8 +7,15 @@ const CommentModel = require("./models/Comment");
 const SubscriptionModel = require("./models/Subscription");
 const ViewModel = require("./models/View");
 
-const sequelize = new Sequelize(process.env.POSTGRES_URI, {
-	logging: false
+pg.defaults.ssl = true;
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+	logging: false,
+	dialectOptions: {
+		ssl: {
+			require: true,
+			rejectUnauthorized: false
+		}
+	}
 });
 (async () => await sequelize.sync({ alter: true }))();
 
