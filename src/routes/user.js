@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const {
-	toggleSubscribe,
-	getFeed,
-	editUser,
-	searchUser,
-	getProfile,
-	recommendChannels,
-	getLikedVideos,
-	getHistory,
+  toggleSubscribe,
+  getFeed,
+  editUser,
+  searchUser,
+  getProfile,
+  recommendChannels,
+  getLikedVideos,
+  getHistory,
 } = require("../controllers/user");
 const { protect } = require("../middlewares/auth");
 

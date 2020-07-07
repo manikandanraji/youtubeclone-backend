@@ -4,13 +4,13 @@ const { recommendedVideos } = require("../controllers/user");
 const { protect } = require("../middlewares/auth");
 
 const {
-	newVideo,
-	getVideo,
-	likeVideo,
-	dislikeVideo,
-	addComment,
-	newView,
-	searchVideo,
+  newVideo,
+  getVideo,
+  likeVideo,
+  dislikeVideo,
+  addComment,
+  newView,
+  searchVideo,
 } = require("../controllers/video");
 
 router.route("/").post(protect, newVideo);

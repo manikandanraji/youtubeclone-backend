@@ -86,6 +86,9 @@ heroku config # if everything worked you will a connection string
 
 ![Watch](screenshots/video.png)
 
+### Suggestions
+![Suggestions](screenshots/suggestions.png)
+
 ### Channel
 
 ![Trending](screenshots/profile.png)

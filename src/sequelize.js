@@ -9,13 +9,13 @@ const ViewModel = require("./models/View");
 
 pg.defaults.ssl = true;
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
-	logging: false,
-	dialectOptions: {
-		ssl: {
-			require: true,
-			rejectUnauthorized: false
-		}
-	}
+  logging: false,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  },
 });
 (async () => await sequelize.sync({ alter: true }))();
 
@@ -35,17 +35,17 @@ Video.belongsToMany(User, { through: VideoLike, foreignKey: "videoId" });
 
 // comments association
 User.hasMany(Comment, {
-	foreignKey: "userId"
+  foreignKey: "userId",
 });
 Comment.belongsTo(User, { foreignKey: "userId" });
 
 Video.hasMany(Comment, {
-	foreignKey: "videoId"
+  foreignKey: "videoId",
 });
 
 // subscription association
 User.hasMany(Subscription, {
-	foreignKey: "subscribeTo"
+  foreignKey: "subscribeTo",
 });
 
 // views association
@@ -53,10 +53,10 @@ User.belongsToMany(Video, { through: View, foreignKey: "userId" });
 Video.belongsToMany(User, { through: View, foreignKey: "videoId" });
 
 module.exports = {
-	User,
-	Video,
-	VideoLike,
-	Comment,
-	Subscription,
-	View
+  User,
+  Video,
+  VideoLike,
+  Comment,
+  Subscription,
+  View,
 };
