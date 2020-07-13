@@ -70,6 +70,10 @@ Now you can use the DATABASE_URL connection string from heroku postgres and use 
 heroku config # if everything worked you will a connection string
 ```
 
+## Watch the Demo
+
+[![Video](screenshots/video.png)](https://youtu.be/wHLurtOnmyM "Youtube Clone Demo")
+
 ## UI
 
 ### Home
