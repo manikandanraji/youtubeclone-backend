@@ -252,6 +252,7 @@ exports.recommendedVideos = asyncHandler(async (req, res, next) => {
 
 exports.recommendChannels = asyncHandler(async (req, res, next) => {
   const channels = await User.findAll({
+		limit: 10,
     attributes: ["id", "username", "avatar", "channelDescription"],
     where: {
       id: {
