@@ -37,6 +37,9 @@ DATABASE_URL=<YOUR_DB_CONNECTION_URI>
 
 Then run <code>npm i</code> and <code>npm run dev</code> to start the development server
 
+For more detailed instructions, [click here](https://github.com/manikandanraji/youtubeclone-frontend/wiki)
+
+
 ## Deploying to Heroku
 
 Create your [heroku account](https://signup.heroku.com/) and install the heroku cli tool globally and login
