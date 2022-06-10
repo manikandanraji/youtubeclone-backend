@@ -1,10 +1,10 @@
 # Youtube Clone Backend
 
+**NOTE: As of 10-06-2022 at 20:02 IST, I am archiving this repository. It was fun while it lasted.**
+
 Youtube clone using PERN stack (Postgres, Express, React, Node). 
 
 This is the backend repository, built with Express + Sequelize. If you are looking for the frontend repository, [click here](https://github.com/manikandanraji/youtubeclone-frontend)
-
-Check out the [deployed site](https://utubeclone.netlify.app/)
 
 ## Core packages
 
